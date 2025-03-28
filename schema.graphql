@@ -65,3 +65,45 @@ type Transfer @entity(immutable: true) {
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
+
+type ActorRegistered @entity(immutable: true) {
+  id: Bytes!
+  actorType: Int! # uint8
+  actorId: BigInt! # uint256
+  account: Bytes! # address
+  hash: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ActorUpdated @entity(immutable: true) {
+  id: Bytes!
+  actorType: Int! # uint8
+  actorId: BigInt! # uint256
+  newHash: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type AccessManagerActorRegistered @entity(immutable: true) {
+  id: Bytes!
+  actorType: Int! # uint8
+  actorId: BigInt! # uint256
+  account: Bytes! # address
+  hash: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type AccessManagerActorUpdated @entity(immutable: true) {
+  id: Bytes!
+  actorType: Int! # uint8
+  actorId: BigInt! # uint256
+  newHash: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

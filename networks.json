@@ -3,6 +3,12 @@
     "SupplyChain": {
       "address": "0x50ad86bca91f8aea9b967280914ddef798f584b0",
       "startBlock": 3572793
+    },
+    "ActorsManager": {
+      "address": "0x05b6901c7Be0D0D3eD4aaf49Ab0d60D361e65224"
+    },
+    "AccessManager": {
+      "address": "0x6375fD99232A93d3409f908435b5ABCcCC0e5f50"
     }
   }
 }
