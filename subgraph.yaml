@@ -1,0 +1,44 @@
+specVersion: 1.2.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: SupplyChain
+    network: holesky
+    source:
+      address: "0x50ad86bca91f8aea9b967280914ddef798f584b0"
+      abi: SupplyChain
+      startBlock: 3572793
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - ApprovalForAll
+        - BatchCreated
+        - BatchMetadataUpdate
+        - BatchStatusUpdated
+        - MetadataUpdate
+        - Transfer
+      abis:
+        - name: SupplyChain
+          file: ./abis/SupplyChain.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,indexed uint256)
+          handler: handleApproval
+        - event: ApprovalForAll(indexed address,indexed address,bool)
+          handler: handleApprovalForAll
+        - event: BatchCreated(indexed uint256,string,uint256)
+          handler: handleBatchCreated
+        - event: BatchMetadataUpdate(uint256,uint256)
+          handler: handleBatchMetadataUpdate
+        - event: BatchStatusUpdated(indexed uint256,uint8,string,uint256)
+          handler: handleBatchStatusUpdated
+        - event: MetadataUpdate(uint256)
+          handler: handleMetadataUpdate
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/supply-chain.ts
