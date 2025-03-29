@@ -1,109 +1,30 @@
-type Approval @entity(immutable: true) {
-  id: Bytes!
-  owner: Bytes! # address
-  approved: Bytes! # address
-  tokenId: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+type Actor @entity {
+  id: ID!
+  actorType: String!
+  address: Bytes!
+  hash: String!
+  issuedAt: BigInt!
 }
 
-type ApprovalForAll @entity(immutable: true) {
-  id: Bytes!
-  owner: Bytes! # address
-  operator: Bytes! # address
-  approved: Boolean! # bool
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+type Batch @entity {
+  id: ID!
+  state: String!
+  hash: String!
+  farmer: Actor
+  processor: Actor
+  packager: Actor
+  distributors: [Actor!]!
+  retailers: [Actor!]!
+  createdAt: BigInt!
 }
 
-type BatchCreated @entity(immutable: true) {
-  id: Bytes!
-  batchId: BigInt! # uint256
-  hash: String! # string
-  timestamp: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type BatchMetadataUpdate @entity(immutable: true) {
-  id: Bytes!
-  _fromTokenId: BigInt! # uint256
-  _toTokenId: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type BatchStatusUpdated @entity(immutable: true) {
-  id: Bytes!
-  batchId: BigInt! # uint256
-  state: Int! # uint8
-  hash: String! # string
-  timestamp: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type MetadataUpdate @entity(immutable: true) {
-  id: Bytes!
-  _tokenId: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type Transfer @entity(immutable: true) {
-  id: Bytes!
-  from: Bytes! # address
-  to: Bytes! # address
-  tokenId: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type ActorRegistered @entity(immutable: true) {
-  id: Bytes!
-  actorType: Int! # uint8
-  actorId: BigInt! # uint256
-  account: Bytes! # address
-  hash: String! # string
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type ActorUpdated @entity(immutable: true) {
-  id: Bytes!
-  actorType: Int! # uint8
-  actorId: BigInt! # uint256
-  newHash: String! # string
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type AccessManagerActorRegistered @entity(immutable: true) {
-  id: Bytes!
-  actorType: Int! # uint8
-  actorId: BigInt! # uint256
-  account: Bytes! # address
-  hash: String! # string
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type AccessManagerActorUpdated @entity(immutable: true) {
-  id: Bytes!
-  actorType: Int! # uint8
-  actorId: BigInt! # uint256
-  newHash: String! # string
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+type SupplyChain @entity {
+  id: ID! @default(value: "supply-chain")
+  batches: [Batch!]!
+  totalBatches: BigInt!
+  totalActors: BigInt!
+  activeBatches: BigInt!
+  inTransit: BigInt!
+  retailedBatches: BigInt!
+  transactions: BigInt!
 }

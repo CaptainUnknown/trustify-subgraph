@@ -1,3 +1,4 @@
+import { BigInt } from "@graphprotocol/graph-ts"
 import {
   Approval as ApprovalEvent,
   ApprovalForAll as ApprovalForAllEvent,
@@ -7,117 +8,80 @@ import {
   MetadataUpdate as MetadataUpdateEvent,
   Transfer as TransferEvent
 } from "../generated/SupplyChain/SupplyChain"
-import {
-  Approval,
-  ApprovalForAll,
-  BatchCreated,
-  BatchMetadataUpdate,
-  BatchStatusUpdated,
-  MetadataUpdate,
-  Transfer
-} from "../generated/schema"
+import { Actor, Batch, SupplyChain } from "../generated/schema"
+import { BATCH_STATE_MAP } from "./constants"
 
-export function handleApproval(event: ApprovalEvent): void {
-  let entity = new Approval(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.owner = event.params.owner
-  entity.approved = event.params.approved
-  entity.tokenId = event.params.tokenId
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
-
-export function handleApprovalForAll(event: ApprovalForAllEvent): void {
-  let entity = new ApprovalForAll(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.owner = event.params.owner
-  entity.operator = event.params.operator
-  entity.approved = event.params.approved
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
+export function handleBatchMetadataUpdate(event: BatchMetadataUpdateEvent): void {}
+export function handleApprovalForAll(event: ApprovalForAllEvent): void {}
+export function handleMetadataUpdate(event: MetadataUpdateEvent): void {}
+export function handleApproval(event: ApprovalEvent): void {}
+export function handleTransfer(event: TransferEvent): void {}
 
 export function handleBatchCreated(event: BatchCreatedEvent): void {
-  let entity = new BatchCreated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.batchId = event.params.batchId
-  entity.hash = event.params.hash
-  entity.timestamp = event.params.timestamp
+  let batch = new Batch(event.params.batchId.toString())
+  batch.state = "HARVESTED"
+  const farmer = Actor.load(event.params.actorId.toHexString())
+  if (farmer) batch.farmer = farmer.id
+  batch.hash = event.params.hash
+  batch.createdAt = event.params.timestamp
+  batch.distributors = []
+  batch.retailers = []
+  batch.save()
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  let supplyChain = SupplyChain.load("supply-chain")
+  if (supplyChain == null) {
+    supplyChain = new SupplyChain("supply-chain")
+    supplyChain.totalBatches = BigInt.fromI32(0)
+    supplyChain.totalActors = BigInt.fromI32(0)
+    supplyChain.activeBatches = BigInt.fromI32(0)
+    supplyChain.inTransit = BigInt.fromI32(0)
+    supplyChain.retailedBatches = BigInt.fromI32(0)
+    supplyChain.transactions = BigInt.fromI32(0)
+    supplyChain.batches = []
+  }
 
-  entity.save()
-}
+  const batches = supplyChain.batches
+  batches.push(batch.id)
+  supplyChain.batches = batches
 
-export function handleBatchMetadataUpdate(
-  event: BatchMetadataUpdateEvent
-): void {
-  let entity = new BatchMetadataUpdate(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity._fromTokenId = event.params._fromTokenId
-  entity._toTokenId = event.params._toTokenId
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
+  supplyChain.totalBatches = supplyChain.totalBatches.plus(BigInt.fromI32(1))
+  supplyChain.activeBatches = supplyChain.activeBatches.plus(BigInt.fromI32(1))
+  supplyChain.transactions = supplyChain.transactions.plus(BigInt.fromI32(1))
+  supplyChain.save()
 }
 
 export function handleBatchStatusUpdated(event: BatchStatusUpdatedEvent): void {
-  let entity = new BatchStatusUpdated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.batchId = event.params.batchId
-  entity.state = event.params.state
-  entity.hash = event.params.hash
-  entity.timestamp = event.params.timestamp
+  let batch = Batch.load(event.params.batchId.toString())
+  let supplyChain = SupplyChain.load("supply-chain")
+  if (batch == null || supplyChain == null) return
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  let stateIndex = changetype<i32>(event.params.state);
+  if (stateIndex < 0 || stateIndex >= BATCH_STATE_MAP.length) return
 
-  entity.save()
-}
+  batch.state = BATCH_STATE_MAP[stateIndex]
+  batch.hash = event.params.hash
 
-export function handleMetadataUpdate(event: MetadataUpdateEvent): void {
-  let entity = new MetadataUpdate(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity._tokenId = event.params._tokenId
+  if (batch.state == "INTRANSIT") supplyChain.inTransit = supplyChain.inTransit.plus(BigInt.fromI32(1))
+  else if (batch.state == "ATRETAILERS") {
+    supplyChain.retailedBatches = supplyChain.retailedBatches.plus(BigInt.fromI32(1))
+    const retailer = Actor.load(event.params.actorId.toHexString())
+    
+    if (!retailer) return
+    
+    const retailers = batch.retailers
+    retailers.push(retailer.id)
+    batch.retailers = retailers
+  } else if (batch.state == "ATDISTRIBUTORS") {
+    const distributor = Actor.load(event.params.actorId.toHexString())
+    
+    if (!distributor) return
+    
+    const distributors = batch.distributors
+    distributors.push(distributor.id)
+    batch.distributors = distributors
+  } else if (batch.state == "TOCUSTOMERS") supplyChain.activeBatches = supplyChain.activeBatches.minus(BigInt.fromI32(1))
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
-
-export function handleTransfer(event: TransferEvent): void {
-  let entity = new Transfer(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.from = event.params.from
-  entity.to = event.params.to
-  entity.tokenId = event.params.tokenId
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
+  supplyChain.transactions = supplyChain.transactions.plus(BigInt.fromI32(1))
+  batch.save()
+  supplyChain.save()
 }

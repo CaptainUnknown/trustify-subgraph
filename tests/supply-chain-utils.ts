@@ -59,6 +59,7 @@ export function createApprovalForAllEvent(
 
 export function createBatchCreatedEvent(
   batchId: BigInt,
+  actorId: BigInt,
   hash: string,
   timestamp: BigInt
 ): BatchCreated {
@@ -70,6 +71,12 @@ export function createBatchCreatedEvent(
     new ethereum.EventParam(
       "batchId",
       ethereum.Value.fromUnsignedBigInt(batchId)
+    )
+  )
+  batchCreatedEvent.parameters.push(
+    new ethereum.EventParam(
+      "actorId",
+      ethereum.Value.fromUnsignedBigInt(actorId)
     )
   )
   batchCreatedEvent.parameters.push(
@@ -112,6 +119,7 @@ export function createBatchMetadataUpdateEvent(
 export function createBatchStatusUpdatedEvent(
   batchId: BigInt,
   state: i32,
+  actorId: BigInt,
   hash: string,
   timestamp: BigInt
 ): BatchStatusUpdated {
@@ -129,6 +137,12 @@ export function createBatchStatusUpdatedEvent(
     new ethereum.EventParam(
       "state",
       ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(state))
+    )
+  )
+  batchStatusUpdatedEvent.parameters.push(
+    new ethereum.EventParam(
+      "actorId",
+      ethereum.Value.fromUnsignedBigInt(actorId)
     )
   )
   batchStatusUpdatedEvent.parameters.push(

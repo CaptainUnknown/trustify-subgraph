@@ -1,11 +1,10 @@
 {
   "holesky": {
     "SupplyChain": {
-      "address": "0x50ad86bca91f8aea9b967280914ddef798f584b0",
-      "startBlock": 3572793
+      "address": "0x811575f68ce91cdf5A038Ad11Fe1973952BBDF06"
     },
     "ActorsManager": {
-      "address": "0x05b6901c7Be0D0D3eD4aaf49Ab0d60D361e65224"
+      "address": "0x37c4a79Ae09e1401F53aE481D877E55C031C1388"
     },
     "AccessManager": {
       "address": "0x6375fD99232A93d3409f908435b5ABCcCC0e5f50"

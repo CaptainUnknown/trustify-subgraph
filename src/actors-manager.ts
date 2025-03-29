@@ -1,36 +1,30 @@
+import { BigInt } from "@graphprotocol/graph-ts"
 import {
   ActorRegistered as ActorRegisteredEvent,
   ActorUpdated as ActorUpdatedEvent,
 } from "../generated/ActorsManager/ActorsManager"
-import { ActorRegistered, ActorUpdated } from "../generated/schema"
+import { Actor, SupplyChain } from "../generated/schema"
 
 export function handleActorRegistered(event: ActorRegisteredEvent): void {
-  let entity = new ActorRegistered(
-    event.transaction.hash.concatI32(event.logIndex.toI32()),
-  )
-  entity.actorType = event.params.actorType
-  entity.actorId = event.params.actorId
-  entity.account = event.params.account
-  entity.hash = event.params.hash
+  let supplyChain = SupplyChain.load("supply-chain")
+  if (supplyChain == null) return
+  let actor = new Actor(event.params.actorId.toString())
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  actor.actorType = event.params.actorType.toString()
+  actor.address = event.params.account
+  actor.hash = event.params.hash
+  actor.issuedAt = event.block.timestamp
 
-  entity.save()
+  supplyChain.totalActors = supplyChain.totalActors.plus(BigInt.fromI32(1))
+
+  actor.save()
 }
 
 export function handleActorUpdated(event: ActorUpdatedEvent): void {
-  let entity = new ActorUpdated(
-    event.transaction.hash.concatI32(event.logIndex.toI32()),
-  )
-  entity.actorType = event.params.actorType
-  entity.actorId = event.params.actorId
-  entity.newHash = event.params.newHash
+  let actor = Actor.load(event.params.actorId.toString())
+  if (actor == null) return
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
+  actor.issuedAt = event.block.timestamp
+  actor.hash = event.params.newHash
+  actor.save()
 }
