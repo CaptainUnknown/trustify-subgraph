@@ -1,13 +1,10 @@
 {
-  "holesky": {
+  "sepolia": {
     "SupplyChain": {
-      "address": "0x811575f68ce91cdf5A038Ad11Fe1973952BBDF06"
+      "address": "0x50aD86bCA91f8aEA9b967280914DdeF798F584b0"
     },
     "ActorsManager": {
-      "address": "0x37c4a79Ae09e1401F53aE481D877E55C031C1388"
-    },
-    "AccessManager": {
-      "address": "0x6375fD99232A93d3409f908435b5ABCcCC0e5f50"
+      "address": "0x05b6901c7Be0D0D3eD4aaf49Ab0d60D361e65224"
     }
   }
 }

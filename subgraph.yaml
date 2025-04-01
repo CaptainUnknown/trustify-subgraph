@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: SupplyChain
-    network: holesky
+    network: sepolia
     source:
-      address: "0x811575f68ce91cdf5A038Ad11Fe1973952BBDF06"
+      address: "0x50aD86bCA91f8aEA9b967280914DdeF798F584b0"
       abi: SupplyChain
-      startBlock: 3576058
+      startBlock: 8027094
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -44,11 +44,11 @@ dataSources:
       file: ./src/supply-chain.ts
   - kind: ethereum
     name: ActorsManager
-    network: holesky
+    network: sepolia
     source:
-      address: "0x37c4a79Ae09e1401F53aE481D877E55C031C1388"
+      address: "0x05b6901c7Be0D0D3eD4aaf49Ab0d60D361e65224"
       abi: ActorsManager
-      startBlock: 3578420
+      startBlock: 8027054
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
