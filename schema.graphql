@@ -1,4 +1,4 @@
-type Actor @entity {
+type Actor @entity(immutable: false) {
   id: ID!
   actorType: String!
   address: Bytes!
@@ -6,7 +6,7 @@ type Actor @entity {
   issuedAt: BigInt!
 }
 
-type Batch @entity {
+type Batch @entity(immutable: false) {
   id: ID!
   state: String!
   hash: String!
@@ -18,9 +18,10 @@ type Batch @entity {
   createdAt: BigInt!
 }
 
-type SupplyChain @entity {
+type SupplyChain @entity(immutable: false) {
   id: ID! @default(value: "supply-chain")
   batches: [Batch!]!
+  actors: [Actor!]!
   totalBatches: BigInt!
   totalActors: BigInt!
   activeBatches: BigInt!

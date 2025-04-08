@@ -38,6 +38,7 @@ export function handleBatchCreated(event: BatchCreatedEvent): void {
     supplyChain.retailedBatches = BigInt.fromI32(0)
     supplyChain.transactions = BigInt.fromI32(0)
     supplyChain.batches = []
+    supplyChain.actors = []
   }
 
   const batches = supplyChain.batches

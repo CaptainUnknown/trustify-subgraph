@@ -7,8 +7,8 @@ The counterfeit "Made in Italy" market is a growing issue, causing significant e
 This subgraph indexes the Trustify Supply Chain contracts deployed on the Sepolia testnet. Subgraph is consumed by the Trustify DApp through the Apollo Supergraph.
 
 Subgraph URLs:
-- [Playground (v0.0.3-sepolia)](https://subgraph.satsuma-prod.com/captains-team--464728/Trustify/playground)
-- [GraphQL API Endpoint (v0.0.3-sepolia)](https://subgraph.satsuma-prod.com/aa1c9e02161b/captains-team--464728/Trustify/api)
+- [Playground (v0.0.4-sepolia)](https://subgraph.satsuma-prod.com/captains-team--464728/Trustify/playground)
+- [GraphQL API Endpoint (v0.0.4-sepolia)](https://subgraph.satsuma-prod.com/aa1c9e02161b/captains-team--464728/Trustify/api)
 
 ## Overview
 This subgraph extracts and structures event data from the following contracts:
