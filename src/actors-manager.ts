@@ -4,6 +4,7 @@ import {
   ActorUpdated as ActorUpdatedEvent,
 } from "../generated/ActorsManager/ActorsManager"
 import { Actor, SupplyChain } from "../generated/schema"
+import { ACTOR_TYPE_MAP } from "./constants"
 
 export function handleActorRegistered(event: ActorRegisteredEvent): void {
   let supplyChain = SupplyChain.load("supply-chain")
@@ -21,12 +22,17 @@ export function handleActorRegistered(event: ActorRegisteredEvent): void {
   
   let actor = new Actor(event.params.actorId.toString())
 
-  actor.actorType = event.params.actorType.toString()
+  let actorType = changetype<i32>(event.params.actorType);
+  if (actorType < 0 || actorType >= ACTOR_TYPE_MAP.length) return
+
+  actor.actorType = ACTOR_TYPE_MAP[actorType]
   actor.address = event.params.account
   actor.hash = event.params.hash
   actor.issuedAt = event.block.timestamp
+  actor.batches = []
 
   supplyChain.totalActors = supplyChain.totalActors.plus(BigInt.fromI32(1))
+  supplyChain.transactions = supplyChain.transactions.plus(BigInt.fromI32(1))
   const actors = supplyChain.actors
   actors.push(actor.id)
   supplyChain.actors = actors
@@ -36,8 +42,12 @@ export function handleActorRegistered(event: ActorRegisteredEvent): void {
 }
 
 export function handleActorUpdated(event: ActorUpdatedEvent): void {
+  let supplyChain = SupplyChain.load("supply-chain")
   let actor = Actor.load(event.params.actorId.toString())
-  if (actor == null) return
+  if (actor == null || supplyChain == null) return
+
+  supplyChain.transactions = supplyChain.transactions.plus(BigInt.fromI32(1))
+  supplyChain.save()
 
   actor.issuedAt = event.block.timestamp
   actor.hash = event.params.newHash

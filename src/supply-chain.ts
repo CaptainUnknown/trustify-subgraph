@@ -20,13 +20,19 @@ export function handleTransfer(event: TransferEvent): void {}
 export function handleBatchCreated(event: BatchCreatedEvent): void {
   let batch = new Batch(event.params.batchId.toString())
   batch.state = "HARVESTED"
-  const farmer = Actor.load(event.params.actorId.toHexString())
-  if (farmer) batch.farmer = farmer.id
+  let farmer = Actor.load(event.params.actorId.toString())
+  if (farmer == null) return
+  batch.farmer = farmer.id
   batch.hash = event.params.hash
   batch.createdAt = event.params.timestamp
   batch.distributors = []
   batch.retailers = []
   batch.save()
+
+  const farmersBatches = farmer.batches
+  farmersBatches.push(batch.id)
+  farmer.batches = farmersBatches
+  farmer.save()
 
   let supplyChain = SupplyChain.load("supply-chain")
   if (supplyChain == null) {
@@ -62,20 +68,27 @@ export function handleBatchStatusUpdated(event: BatchStatusUpdatedEvent): void {
   batch.state = BATCH_STATE_MAP[stateIndex]
   batch.hash = event.params.hash
 
+  let involvedActor = Actor.load(event.params.actorId.toString())
+  if (involvedActor == null) return
+  const actorsBatches = involvedActor.batches
+  actorsBatches.push(batch.id)
+  involvedActor.batches = actorsBatches
+  involvedActor.save()
+  
   if (batch.state == "INTRANSIT") supplyChain.inTransit = supplyChain.inTransit.plus(BigInt.fromI32(1))
   else if (batch.state == "ATRETAILERS") {
     supplyChain.retailedBatches = supplyChain.retailedBatches.plus(BigInt.fromI32(1))
-    const retailer = Actor.load(event.params.actorId.toHexString())
+    const retailer = Actor.load(event.params.actorId.toString())
     
-    if (!retailer) return
+    if (retailer == null) return
     
     const retailers = batch.retailers
     retailers.push(retailer.id)
     batch.retailers = retailers
   } else if (batch.state == "ATDISTRIBUTORS") {
-    const distributor = Actor.load(event.params.actorId.toHexString())
+    const distributor = Actor.load(event.params.actorId.toString())
     
-    if (!distributor) return
+    if (distributor == null) return
     
     const distributors = batch.distributors
     distributors.push(distributor.id)
@@ -83,6 +96,6 @@ export function handleBatchStatusUpdated(event: BatchStatusUpdatedEvent): void {
   } else if (batch.state == "TOCUSTOMERS") supplyChain.activeBatches = supplyChain.activeBatches.minus(BigInt.fromI32(1))
 
   supplyChain.transactions = supplyChain.transactions.plus(BigInt.fromI32(1))
-  batch.save()
   supplyChain.save()
+  batch.save()
 }
